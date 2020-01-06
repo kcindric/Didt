@@ -1,4 +1,4 @@
-# WDIDO
+# DIDT
 
 ## Project setup
 ```
