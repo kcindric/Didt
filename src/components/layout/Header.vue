@@ -1,6 +1,6 @@
 <template>
   <header class="header">
-    <h1>WDIDO</h1> 
+    <h1>DIDT</h1> 
     <img src="../../assets/logo.png" alt="logo" class="logo-image">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
