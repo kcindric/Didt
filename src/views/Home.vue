@@ -23,7 +23,7 @@
       </div>
       <ScoreBoard v-bind:todos_scoreboard="totalTime" v-bind:week="week" class="score-board" /> 
       <AddTodo v-on:add-todo="addTodo" class="add-todo" />
-      <Todos v-bind:todos_todos="todos" v-on:del-todo="deleteTodo" class="todos" />
+      <Todos v-bind:todos_todos="todos" v-on:del-todo="deleteTodo" class="todos" v-if="todos.length > 0" />
     </div>
   </div>
 </template>
@@ -196,12 +196,11 @@ export default {
           timeCompleted
         })
         .then(res => (this.todos = [...this.todos, res.data]));
-        this.hideAdd()
     },
     getMonday: function() {
       //In this demo the present day is 2019-12-24 because there is no data "in the future"
       var monday = new Date(
-        moment("2019-12-24")
+        moment("2019-12-28")
           .startOf("isoweek")
           .toDate()
       );
@@ -209,7 +208,7 @@ export default {
     },
     getSunday() {
       var sunday = new Date(
-        moment("2019-12-24")
+        moment("2019-12-28")
           .endOf("isoweek")
           .toDate()
       );

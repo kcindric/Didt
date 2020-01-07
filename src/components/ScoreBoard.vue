@@ -3,6 +3,9 @@
       <h2 class="score text-center mt-3">Week score board <i class="fas fa-trophy fa-xs"></i></h2>
       <div class="score-board-inner">
         <b-table striped hover :items="this.todos_scoreboard"></b-table>
+        <div class="notification-scoreboard" v-if="this.todos_scoreboard.length == 0">
+          <p>Oops, there seems to be no data in this week</p>
+        </div>
       </div>
   </div>
 </template>
@@ -76,5 +79,8 @@ export default {
   color: goldenrod;
 }
 
+.notification-scoreboard p{
+  color:#b3b9bf;
+}
 
 </style>

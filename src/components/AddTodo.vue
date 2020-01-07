@@ -162,6 +162,7 @@ export default {
           duration: this.duration,
           timeCompleted: new Date()
         };
+        console.log(newTodo.timeCompleted)
         // send to parent
         this.$emit("add-todo", newTodo);
         this.done = [
