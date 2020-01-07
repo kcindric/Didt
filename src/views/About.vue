@@ -1,6 +1,7 @@
 <template>
   <div class="about">
     <h1>This is an about page</h1>
+    <a href="https://github.com/kcindric/didt">Github</a>
     <p>I'll put something here later.</p>
     <p>Todo:</p>
     <ul>
