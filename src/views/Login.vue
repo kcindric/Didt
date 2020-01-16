@@ -75,7 +75,7 @@ export default {
   },
   methods: {
     handleLogin() {
-      this.loading = true;
+      this.loading = false;
       this.$validator.validateAll();
 
       if (this.errors.any()) {
