@@ -89,6 +89,11 @@ export default {
         .then(res => (this.todos = res.data));
     }
   },
+  mounted() {
+    if (!this.currentUser) {
+      this.$router.push('/login');
+    }
+  },
   computed: {
     //for score board
     //total time a user did his tasks
