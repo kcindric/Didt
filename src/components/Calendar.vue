@@ -20,9 +20,6 @@ export default {
             deep:true,
             handler: function(){
                 console.log("force")
-                let vm = this;
-                vm.$forceUpdate();
-                console.log("update")
             }
             
         }

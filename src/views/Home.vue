@@ -171,6 +171,9 @@ export default {
     endDate: function() {
       var value = this.getSunday();
       return moment(String(value)).format("YYYY-MM-DD");
+    },
+    currentUser: function() {
+      return this.$store.state.auth.user;
     }
   },
   methods: {
