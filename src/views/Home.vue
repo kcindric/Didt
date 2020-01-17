@@ -208,7 +208,7 @@ export default {
     getMonday: function() {
       //In this demo the present day is 2019-12-24 because there is no data "in the future"
       var monday = new Date(
-        moment("2019-12-28")
+        moment()
           .startOf("isoweek")
           .toDate()
       );
@@ -216,7 +216,7 @@ export default {
     },
     getSunday() {
       var sunday = new Date(
-        moment("2019-12-28")
+        moment()
           .endOf("isoweek")
           .toDate()
       );
