@@ -34,6 +34,7 @@ import AddTodo from "../components/AddTodo.vue";
 import ScoreBoard from "../components/ScoreBoard.vue";
 import axios from "axios";
 import moment from "moment";
+import UserService from "../services/user.service"
 
 export default {
   name: "home",
@@ -67,12 +68,6 @@ export default {
     }
   },
   created() {
-    //fetching
-    axios
-      .get(
-        `https://my-json-server.typicode.com/kcindric/fakeJson/events?timeCompleted_gte=${this.startDate.toString()}&timeCompleted_lte=${this.endDate.toString()}`
-      )
-      .then(res => (this.todos = res.data));
 
     //setting current week
     this.attr[0].dates[0].start = this.getMonday();
@@ -82,17 +77,23 @@ export default {
     week: function() {
       this.attr[0].dates[0].start = this.getMonday();
       this.attr[0].dates[0].end = this.getSunday();
-      axios
-        .get(
-          `https://my-json-server.typicode.com/kcindric/fakeJson/events?timeCompleted_gte=${this.startDate.toString()}&timeCompleted_lte=${this.endDate.toString()}`
-        )
-        .then(res => (this.todos = res.data));
+
+      //fetching
+      var token = this.$store.state.auth.user.token;
+      UserService.getEvents(this.startDate.toString(), this.endDate.toString(), token).then(
+      res => this.todos = res.data
+    );
     }
   },
   mounted() {
     if (!this.currentUser) {
       this.$router.push('/login');
     }
+
+    var token = this.$store.state.auth.user.token;
+    UserService.getEvents(this.startDate.toString(), this.endDate.toString(), token).then(
+      res => this.todos = res.data
+    );
   },
   computed: {
     //for score board
@@ -100,10 +101,10 @@ export default {
     totalTime: function() {
       const durationScore = [];
       for (const element of this.todos) {
-        if (durationScore.some(e => e.name === element.name)) {
+        if (durationScore.some(e => e.userId === element.userId)) {
           var std_count = durationScore
             .filter(e => {
-              return e.name === element.name;
+              return e.userId === element.userId;
             })[0]
             .duration.toString();
 
@@ -153,11 +154,11 @@ export default {
             reMinutes.exec(displayTime.toString())[0].substring(0, 2);
 
           durationScore.filter(e => {
-            return e.name === element.name;
+            return e.userId === element.userId;
           })[0].duration = newDuration;
         } else {
           durationScore.push({
-            name: element.name,
+            name: element.userId,
             duration: element.duration
           });
         }
@@ -194,11 +195,11 @@ export default {
       }
     },
     addTodo(newTodo) {
-      const { id, name, duration, done, timeCompleted } = newTodo;
+      const { id, userId, duration, done, timeCompleted } = newTodo;
       axios
         .post("https://my-json-server.typicode.com/kcindric/fakeJson/events", {
           id,
-          name,
+          userId,
           duration,
           done,
           timeCompleted
@@ -206,7 +207,6 @@ export default {
         .then(res => (this.todos = [...this.todos, res.data]));
     },
     getMonday: function() {
-      //In this demo the present day is 2019-12-24 because there is no data "in the future"
       var monday = new Date(
         moment()
           .startOf("isoweek")

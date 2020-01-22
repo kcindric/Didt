@@ -1,5 +1,5 @@
 import axios from 'axios';
-import authHeader from './auth-header';
+import authHeader from './auth-headers';
 
 const API_URL = 'http://localhost:8080/';
 
@@ -8,8 +8,11 @@ class UserService {
     return axios.get(API_URL + 'all');
   }
 
-  getEvents() {
-    return axios.get(API_URL + 'events', { headers: authHeader() });
+  getEvents(start, end, token) {
+    return axios
+      .get(
+        API_URL + `events?start=${start}&end=${end}`, { headers: authHeader(token) }
+      );
   }
 
   getUserBoard() {

@@ -2,7 +2,7 @@
   <div class="todo-item">
     <div>
       <div class="heading">
-          <h3>{{todo.name}}</h3>
+          <h3>{{todo.userId}}</h3>
           <p>{{todo.timeCompleted | formatDate}}</p>
       </div>
       
@@ -10,7 +10,7 @@
     </div>
     <div class="task-list">
       <ul class="fa-ul">
-      <li v-for="task in todo.done" v-bind:key="task.id"><span class="fa-li"><i class="fas fa-check"></i></span>{{task.taskDone}}</li>
+      <li v-for="task in todo.tasks" v-bind:key="task.id"><span class="fa-li"><i class="fas fa-check"></i></span>{{task.taskDone}}</li>
       </ul>
       <b-button
               v-on:click="$emit('del-todo', todo.id)"
