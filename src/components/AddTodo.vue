@@ -14,7 +14,7 @@
         >
           <b-form-input id="input-1" v-model="name" :state="!$v.name.$invalid" trim></b-form-input>
         </b-form-group> -->
-        <div v-for="(task, index) in done" v-bind:key="task.pseudoId">
+        <div v-for="(task, index) in tasks" v-bind:key="task.pseudoId">
           <b-form-group
             id="fieldset-2"
             description="Let us know what task you did."
@@ -24,17 +24,17 @@
             label-for="input-2"
             :invalid-feedback="invalidFeedbackTask"
             :valid-feedback="validFeedback"
-            :state="!$v.done.$invalid"
+            :state="!$v.tasks.$invalid"
           >
           <b-input-group>
-            <b-form-input id="input-2" v-model="task.taskDone" :state="!$v.done.$invalid" trim></b-form-input>
+            <b-form-input id="input-2" v-model="task.taskDone" :state="!$v.tasks.$invalid" trim></b-form-input>
             <b-button
               @click="removeTask(index)"
               variant="outline-warning"
               type="submit"
               value="removeTask"
               class="task-button"
-              v-if="done.length > 1 && index!=0"
+              v-if="tasks.length > 1 && index!=0"
             ><i class="far fa-trash-alt"></i></b-button>
             <b-button
           @click="addTask"
@@ -88,8 +88,10 @@ export default {
   name: "AddTodo",
   data() {
     return {
-      name: "Kiki",
-      done: [{
+      username: "",
+      firstName: "",
+      lastName: "",
+      tasks: [{
         id: uuid.v4(),
         taskDone: ""
       }],
@@ -97,12 +99,13 @@ export default {
       timeCompleted: ""
     };
   },
+  //https://bootstrap-vue.js.org/docs/reference/validation/
   validations: {
     // name: {
     //   required,
     //   minLength: minLength(2)
     // },
-    done: {
+    tasks: {
       required,
       minLength: minLength(1),
       $each: {
@@ -131,7 +134,7 @@ export default {
       }
     },
     invalidFeedbackTask() {
-      if (!this.$v.done) {
+      if (!this.$v.tasks) {
         return "";
       } 
       else {
@@ -146,26 +149,28 @@ export default {
     addTask: function(e) {
       e.preventDefault();
       const id = uuid.v4();
-      this.done.push({ id, taskDone: "" });
+      this.tasks.push({ id, taskDone: "" });
     },
     removeTask: function(index) {
       
-      this.done.splice(index, 1);
+      this.tasks.splice(index, 1);
     },
     addTodo(e) {
       e.preventDefault();
       if (!this.$v.$invalid) {
         const newTodo = {
           id: uuid.v4(),
-          name: this.name,
-          done: this.done,
+          username: this.$store.state.auth.user.username,
+          firstName: this.$store.state.auth.user.firstName,
+          lastName: this.$store.state.auth.user.lastName,
+          tasks: this.tasks,
           duration: this.duration,
           timeCompleted: new Date()
         };
         console.log(newTodo.timeCompleted)
         // send to parent
         this.$emit("add-todo", newTodo);
-        this.done = [
+        this.tasks = [
         {
           id: uuid.v4(),
           taskDone: ""
@@ -175,7 +180,7 @@ export default {
       }
     },
     cancel(){
-      this.done = [
+      this.tasks = [
         {
           id: uuid.v4(),
           taskDone: ""

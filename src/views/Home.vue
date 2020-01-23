@@ -9,7 +9,9 @@
           id="submit"
           size="sm"
           @click="weekDown"
-        ><i class="fas fa-chevron-left"></i></b-button>
+        >
+          <i class="fas fa-chevron-left"></i>
+        </b-button>
         <p>{{this.attr[0].dates[0].start | formatDate}} - {{this.attr[0].dates[0].end | formatDate}}</p>
         <b-button
           variant="outline-dark"
@@ -19,11 +21,18 @@
           size="sm"
           @click="weekUp"
           v-bind:disabled="week>=0"
-        ><i class="fas fa-angle-right"></i></b-button>
+        >
+          <i class="fas fa-angle-right"></i>
+        </b-button>
       </div>
-      <ScoreBoard v-bind:todos_scoreboard="totalTime" v-bind:week="week" class="score-board" /> 
+      <ScoreBoard v-bind:todos_scoreboard="totalTime" v-bind:week="week" class="score-board" />
       <AddTodo v-on:add-todo="addTodo" class="add-todo" />
-      <Todos v-bind:todos_todos="todos" v-on:del-todo="deleteTodo" class="todos" v-if="todos.length > 0" />
+      <Todos
+        v-bind:todos_todos="todos"
+        v-on:del-todo="deleteTodo"
+        class="todos"
+        v-if="todos.length > 0"
+      />
     </div>
   </div>
 </template>
@@ -34,7 +43,8 @@ import AddTodo from "../components/AddTodo.vue";
 import ScoreBoard from "../components/ScoreBoard.vue";
 import axios from "axios";
 import moment from "moment";
-import UserService from "../services/user.service"
+import UserService from "../services/user.service";
+import authHeader from '../services/auth-headers';
 
 export default {
   name: "home",
@@ -52,7 +62,8 @@ export default {
           bar: true,
           dates: [{ start: null, end: null }]
         }
-      ]
+      ],
+      token: this.$store.state.auth.user.token
     };
   },
   filters: {
@@ -68,7 +79,6 @@ export default {
     }
   },
   created() {
-
     //setting current week
     this.attr[0].dates[0].start = this.getMonday();
     this.attr[0].dates[0].end = this.getSunday();
@@ -79,21 +89,23 @@ export default {
       this.attr[0].dates[0].end = this.getSunday();
 
       //fetching
-      var token = this.$store.state.auth.user.token;
-      UserService.getEvents(this.startDate.toString(), this.endDate.toString(), token).then(
-      res => this.todos = res.data
-    );
+      UserService.getEvents(
+        this.startDate.toString(),
+        this.endDate.toString(),
+        this.token
+      ).then(res => (this.todos = res.data));
     }
   },
   mounted() {
     if (!this.currentUser) {
-      this.$router.push('/login');
+      this.$router.push("/login");
     }
 
-    var token = this.$store.state.auth.user.token;
-    UserService.getEvents(this.startDate.toString(), this.endDate.toString(), token).then(
-      res => this.todos = res.data
-    );
+    UserService.getEvents(
+      this.startDate.toString(),
+      this.endDate.toString(),
+      this.token
+    ).then(res => (this.todos = res.data));
   },
   computed: {
     //for score board
@@ -101,10 +113,10 @@ export default {
     totalTime: function() {
       const durationScore = [];
       for (const element of this.todos) {
-        if (durationScore.some(e => e.userId === element.userId)) {
+        if (durationScore.some(e => e.name === element.firstName)) {
           var std_count = durationScore
             .filter(e => {
-              return e.userId === element.userId;
+              return e.name === element.firstName;
             })[0]
             .duration.toString();
 
@@ -154,11 +166,11 @@ export default {
             reMinutes.exec(displayTime.toString())[0].substring(0, 2);
 
           durationScore.filter(e => {
-            return e.userId === element.userId;
+            return e.name === element.firstName;
           })[0].duration = newDuration;
         } else {
           durationScore.push({
-            name: element.userId,
+            name: element.firstName,
             duration: element.duration
           });
         }
@@ -179,31 +191,44 @@ export default {
   },
   methods: {
     deleteTodo(id) {
-      if (confirm("Are you sure you want to delete this?")) {
-        // this.todos = this.todos.filter(todo => todo.id !== id);
-        axios
-          .delete(
-            `https://my-json-server.typicode.com/kcindric/fakeJson/events/${id}`
-          )
-          //trebao bi ici res => res.nešto no ovdje to ne radim jer ekšli ne dobijem nikakav response od fake API-a
-          //pa samo radim filter za prikazivanje
-          .then((this.todos = this.todos.filter(todo => todo.id !== id)))
-          // eslint-disable-next-line no-console
-          .catch(err => console.log(err));
+      var todoUser = this.todos.filter(todo => todo.id === id);
+      if (this.$store.state.auth.user.username === todoUser[0].username) {
+        if (confirm("Are you sure you want to delete this?")) {
+          // this.todos = this.todos.filter(todo => todo.id !== id);
+          UserService.deleteEvent(id, this.token)
+            //trebao bi ici res => res.nešto no ovdje to ne radim jer ekšli ne dobijem nikakav response od fake API-a
+            //pa samo radim filter za prikazivanje
+            .then((this.todos = this.todos.filter(todo => todo.id !== id)))
+            // eslint-disable-next-line no-console
+            .catch(err => console.log(err));
+        } else {
+          return;
+        }
       } else {
         return;
       }
     },
     addTodo(newTodo) {
-      const { id, userId, duration, done, timeCompleted } = newTodo;
+      const {
+        id,
+        username,
+        firstName,
+        lastName,
+        duration,
+        tasks,
+        timeCompleted
+      } = newTodo;
+
       axios
-        .post("https://my-json-server.typicode.com/kcindric/fakeJson/events", {
+        .post(`http://localhost:8080/events/create`, {
           id,
-          userId,
+          username,
+          firstName,
+          lastName,
           duration,
-          done,
+          tasks,
           timeCompleted
-        })
+        }, { headers: authHeader(this.token)})
         .then(res => (this.todos = [...this.todos, res.data]));
     },
     getMonday: function() {
@@ -233,7 +258,7 @@ export default {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap");
 html {
   line-height: 1.6 !important;
 }
@@ -247,15 +272,15 @@ h5 {
 }
 
 #app {
-  font-family: 'Source Sans Pro', sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: left;
   color: #2c3e50;
   margin-top: 0px;
 }
-.wrapper{
-  display:flex;
+.wrapper {
+  display: flex;
   flex-direction: column;
   align-items: center;
 }
@@ -271,27 +296,26 @@ h5 {
 }
 .week-buttons button {
   margin: 30px;
-  margin-bottom:0px;
+  margin-bottom: 0px;
 }
-.score-board{
+.score-board {
   width: 50%;
   flex: 1;
   border: 1px #efefef solid;
   box-shadow: 2px 6px 25px rgba(0, 0, 0, 0.1);
   border-radius: 0.25rem;
-  margin-bottom:30px;
-  padding: 30px; 
+  margin-bottom: 30px;
+  padding: 30px;
 }
 
-
-.add-todo{
+.add-todo {
   border: 1px solid #efefef;
   box-shadow: 2px 6px 25px rgba(0, 0, 0, 0.1);
   width: 50%;
   border-radius: 0.25rem;
   margin-bottom: 30px;
 }
-.todos{
+.todos {
   border: 1px solid #efefef;
   box-shadow: 2px 6px 25px rgba(0, 0, 0, 0.1);
   width: 50%;
@@ -300,28 +324,26 @@ h5 {
 }
 
 @media only screen and (max-width: 768px) {
+  .score-board {
+    width: 100%;
+  }
 
-   .score-board{
-     width:100%;
-   }
+  .add-todo {
+    width: 100%;
+  }
 
-   .add-todo{
-     width:100%;
-   }
-
-   .todos{
-     width:100%;
-     margin-bottom: 0px;
-   }
-
+  .todos {
+    width: 100%;
+    margin-bottom: 0px;
+  }
 }
 
-@media only screen and (max-width: 768px){
-  .week-buttons p{
+@media only screen and (max-width: 768px) {
+  .week-buttons p {
     font-size: 0.9rem;
   }
 
-  .week-buttons button{
+  .week-buttons button {
     size: sm !important;
   }
 }

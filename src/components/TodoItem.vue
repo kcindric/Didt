@@ -2,7 +2,7 @@
   <div class="todo-item">
     <div>
       <div class="heading">
-          <h3>{{todo.userId}}</h3>
+          <h3>{{todo.firstName}}</h3>
           <p>{{todo.timeCompleted | formatDate}}</p>
       </div>
       
@@ -13,6 +13,7 @@
       <li v-for="task in todo.tasks" v-bind:key="task.id"><span class="fa-li"><i class="fas fa-check"></i></span>{{task.taskDone}}</li>
       </ul>
       <b-button
+              v-if="this.todo.username == this.$store.state.auth.user.username"
               v-on:click="$emit('del-todo', todo.id)"
               variant="outline-danger"
               type="submit"

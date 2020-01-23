@@ -1,6 +1,7 @@
 <template>
   <div class="about">
     <h1>This is an about page</h1>
+    <p>Version 1.0</p>
     <i class="fab fa-github"></i><a href="https://github.com/kcindric/didt"> Github</a>
     <br>
     <br>
@@ -8,9 +9,7 @@
     <p>Todo:</p>
     <ul>
       <li>Scoreboard leader icon</li>
-      <li>You can delete only your tasks</li>
       <li>Validate on submit</li>
-      <li>Show a blank score board and tasks when there's no data</li>
     </ul>
   </div>
 </template>
