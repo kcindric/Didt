@@ -49,6 +49,7 @@ export default {
     width: 45px;
     top: 23px;
     right: 8px;
+    user-select: none;
 }
 
 .username{

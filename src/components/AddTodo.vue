@@ -17,17 +17,17 @@
         <div v-for="(task, index) in tasks" v-bind:key="task.pseudoId">
           <b-form-group
             id="fieldset-2"
-            description="Let us know what task you did."
+            description="What did you do?"
             label="Enter task"
             label-size="sm"
             label-cols-xl="1"
             label-for="input-2"
             :invalid-feedback="invalidFeedbackTask"
             :valid-feedback="validFeedback"
-            :state="!$v.tasks.$invalid"
+            :state="tasksValid"
           >
           <b-input-group>
-            <b-form-input id="input-2" v-model="task.taskDone" :state="!$v.tasks.$invalid" trim></b-form-input>
+            <b-form-input id="input-2" v-model="task.taskDone" :state="tasksValid" trim></b-form-input>
             <b-button
               @click="removeTask(index)"
               variant="outline-warning"
@@ -49,21 +49,21 @@
         </div>
         <b-form-group
           id="fieldset-3"
-          description="Let us know how long did it take."
+          description="How long did it take?"
           label="Enter duration"
           label-size="sm"
           label-cols-xl="1"
           label-for="input-3"
           :invalid-feedback="invalidFeedbackDuration"
           :valid-feedback="validFeedback"
-          :state="!$v.duration.$invalid"
+          :state="durationValid"
         >
           <b-form-input
             id="input-3"
             v-mask="'##:##'"
             placeholder="hh:mm"
             v-model="duration"
-            :state="!$v.duration.$invalid"
+            :state="durationValid"
             trim
           ></b-form-input>
         </b-form-group>
@@ -71,7 +71,6 @@
           <b-button variant="outline-dark" type="submit" value="submit" id="submit" class="submit-task">Submit</b-button>
           <b-button variant="outline-dark" type="submit" value="submit" id="submit" class="cancel-task" @click="cancel">Cancel</b-button>
         </div>
-        
     </div>
 
     
@@ -96,7 +95,9 @@ export default {
         taskDone: ""
       }],
       duration: "",
-      timeCompleted: ""
+      timeCompleted: "",
+      durationValid: null,
+      tasksValid: null
     };
   },
   //https://bootstrap-vue.js.org/docs/reference/validation/
@@ -146,6 +147,10 @@ export default {
     }
   },
   methods: {
+    validateState(){
+      const {$invalid} = this.$v.duration;
+      return $invalid ? false : true;
+    },
     addTask: function(e) {
       e.preventDefault();
       const id = uuid.v4();
@@ -157,6 +162,16 @@ export default {
     },
     addTodo(e) {
       e.preventDefault();
+      this.durationValid = false;
+      if(!this.$v.duration.$invalid){
+        this.durationValid = true;
+      }
+
+      this.tasksValid = false;
+      if(!this.$v.tasks.$invalid){
+        this.tasksValid = true;
+      }
+
       if (!this.$v.$invalid) {
         const newTodo = {
           id: uuid.v4(),
@@ -167,7 +182,6 @@ export default {
           duration: this.duration,
           timeCompleted: new Date()
         };
-        console.log(newTodo.timeCompleted)
         // send to parent
         this.$emit("add-todo", newTodo);
         this.tasks = [
@@ -177,6 +191,8 @@ export default {
         }
         ];
         this.duration = "";
+        this.durationValid = null;
+        this.tasksValid = null;
       }
     },
     cancel(){

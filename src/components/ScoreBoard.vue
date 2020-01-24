@@ -46,7 +46,6 @@ export default {
     },
     watch:{
         week: function(){
-            console.log("promjena tjedna")
             this.attr[0].dates[0].start = this.getMonday(new Date('2019-12-24'))
             this.attr[0].dates[0].end = this.getSunday(new Date('2019-12-24'))
 

@@ -9,7 +9,6 @@
     <p>Todo:</p>
     <ul>
       <li>Scoreboard leader icon</li>
-      <li>Validate on submit</li>
     </ul>
   </div>
 </template>
